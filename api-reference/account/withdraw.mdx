@@ -1,0 +1,387 @@
+---
+title: Request withdrawal
+description: Withdraw funds to a PIX key
+---
+
+# Request withdrawal
+
+`POST /api/v1/withdraw`
+
+Requests a withdrawal of funds from your account to a PIX key.
+
+## Request
+
+### Headers
+
+| Header | Type | Required | Description |
+|--------|------|----------|-------------|
+| `X-API-Key` | string | Yes | Your API key |
+| `X-API-Secret` | string | Yes | Your API secret |
+| `Content-Type` | string | Yes | Must be `application/json` |
+
+### Body parameters
+
+<ParamField body="amount" type="number" required>
+  The withdrawal amount in Brazilian Reais (BRL). Must not exceed your available balance.
+</ParamField>
+
+<ParamField body="pixKey" type="string" required>
+  The PIX key to receive the funds.
+</ParamField>
+
+<ParamField body="pixKeyType" type="string" required>
+  The type of PIX key. Must be one of:
+  - `CPF` - Brazilian individual tax ID
+  - `CNPJ` - Brazilian company tax ID
+  - `EMAIL` - Email address
+  - `PHONE` - Phone number with country code
+  - `EVP` - Random key (UUID format)
+</ParamField>
+
+## Response
+
+<ResponseField name="success" type="boolean">
+  Indicates if the request was successful.
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  The withdrawal data.
+  
+  <Expandable title="data properties">
+    <ResponseField name="withdrawalId" type="integer">
+      Unique withdrawal identifier.
+    </ResponseField>
+    
+    <ResponseField name="amount" type="number">
+      The withdrawal amount.
+    </ResponseField>
+    
+    <ResponseField name="pixKey" type="string">
+      The PIX key receiving the funds.
+    </ResponseField>
+    
+    <ResponseField name="pixKeyType" type="string">
+      The type of PIX key.
+    </ResponseField>
+    
+    <ResponseField name="status" type="string">
+      Current withdrawal status. Initially `pending`.
+    </ResponseField>
+    
+    <ResponseField name="estimatedCompletion" type="string">
+      ISO 8601 timestamp of estimated completion time.
+    </ResponseField>
+    
+    <ResponseField name="createdAt" type="string">
+      ISO 8601 timestamp when withdrawal was requested.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Example
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://your-domain.com/api/v1/withdraw \
+  -H "X-API-Key: your_api_key" \
+  -H "X-API-Secret: your_api_secret" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 500.00,
+    "pixKey": "joao@example.com",
+    "pixKeyType": "EMAIL"
+  }'
+```
+
+```javascript Node.js
+const response = await fetch('https://your-domain.com/api/v1/withdraw', {
+  method: 'POST',
+  headers: {
+    'X-API-Key': 'your_api_key',
+    'X-API-Secret': 'your_api_secret',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    amount: 500.00,
+    pixKey: 'joao@example.com',
+    pixKeyType: 'EMAIL'
+  })
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://your-domain.com/api/v1/withdraw',
+    headers={
+        'X-API-Key': 'your_api_key',
+        'X-API-Secret': 'your_api_secret',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'amount': 500.00,
+        'pixKey': 'joao@example.com',
+        'pixKeyType': 'EMAIL'
+    }
+)
+
+data = response.json()
+print(data)
+```
+
+```php PHP
+<?php
+$ch = curl_init('https://your-domain.com/api/v1/withdraw');
+
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'X-API-Key: your_api_key',
+    'X-API-Secret: your_api_secret',
+    'Content-Type: application/json'
+]);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
+    'amount' => 500.00,
+    'pixKey' => 'joao@example.com',
+    'pixKeyType' => 'EMAIL'
+]));
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+$data = json_decode($response, true);
+print_r($data);
+?>
+```
+
+</CodeGroup>
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "withdrawalId": 67890,
+    "amount": 500.00,
+    "pixKey": "joao@example.com",
+    "pixKeyType": "EMAIL",
+    "status": "pending",
+    "estimatedCompletion": "2024-01-15T10:35:00Z",
+    "createdAt": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+## Status codes
+
+| Status | Description |
+|--------|-------------|
+| `200` | Withdrawal requested successfully |
+| `400` | Invalid request parameters |
+| `401` | Invalid or missing authentication |
+| `422` | Validation error |
+| `500` | Internal server error |
+
+## Common errors
+
+### Insufficient balance
+
+```json
+{
+  "success": false,
+  "error": "Insufficient balance for withdrawal",
+  "code": "INSUFFICIENT_BALANCE",
+  "details": {
+    "available": 250.00,
+    "requested": 500.00
+  }
+}
+```
+
+### Invalid PIX key format
+
+```json
+{
+  "success": false,
+  "error": "Validation failed",
+  "code": "VALIDATION_ERROR",
+  "details": {
+    "pixKey": "Invalid email format"
+  }
+}
+```
+
+### Invalid PIX key type
+
+```json
+{
+  "success": false,
+  "error": "Validation failed",
+  "code": "VALIDATION_ERROR",
+  "details": {
+    "pixKeyType": "Must be one of: CPF, CNPJ, EMAIL, PHONE, EVP"
+  }
+}
+```
+
+### Minimum withdrawal amount
+
+```json
+{
+  "success": false,
+  "error": "Validation failed",
+  "code": "VALIDATION_ERROR",
+  "details": {
+    "amount": "Minimum withdrawal amount is R$ 10.00"
+  }
+}
+```
+
+## PIX key formats
+
+### CPF
+```
+12345678900
+```
+11 digits, numbers only.
+
+### CNPJ
+```
+12345678000190
+```
+14 digits, numbers only.
+
+### Email
+```
+user@example.com
+```
+Valid email address format.
+
+### Phone
+```
++5511999999999
+```
+Country code + area code + number.
+
+### EVP (Random key)
+```
+123e4567-e89b-12d3-a456-426614174000
+```
+UUID v4 format.
+
+## Withdrawal process
+
+1. **Request submitted** - Your withdrawal request is received and validated
+2. **Balance check** - System verifies you have sufficient available balance
+3. **Processing** - Withdrawal is sent to the PIX network
+4. **Completed** - Funds are transferred to the destination PIX key
+
+Withdrawals typically complete within a few minutes, but may take up to 24 hours in some cases.
+
+## Example with balance check
+
+```javascript Node.js
+async function safeWithdraw(amount, pixKey, pixKeyType) {
+  // Check balance first
+  const balanceResponse = await fetch('https://your-domain.com/api/v1/balance', {
+    headers: {
+      'X-API-Key': process.env.PRIMEPIX_API_KEY,
+      'X-API-Secret': process.env.PRIMEPIX_API_SECRET
+    }
+  });
+  
+  const { data: balance } = await balanceResponse.json();
+  
+  if (balance.available < amount) {
+    throw new Error(
+      `Insufficient balance. Available: R$ ${balance.available.toFixed(2)}`
+    );
+  }
+  
+  // Proceed with withdrawal
+  const withdrawResponse = await fetch('https://your-domain.com/api/v1/withdraw', {
+    method: 'POST',
+    headers: {
+      'X-API-Key': process.env.PRIMEPIX_API_KEY,
+      'X-API-Secret': process.env.PRIMEPIX_API_SECRET,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      amount,
+      pixKey,
+      pixKeyType
+    })
+  });
+  
+  const result = await withdrawResponse.json();
+  
+  if (!result.success) {
+    throw new Error(result.error);
+  }
+  
+  return result.data;
+}
+
+// Usage
+try {
+  const withdrawal = await safeWithdraw(500.00, 'user@example.com', 'EMAIL');
+  console.log(`Withdrawal ${withdrawal.withdrawalId} requested successfully`);
+} catch (error) {
+  console.error('Withdrawal failed:', error.message);
+}
+```
+
+## Webhook notifications
+
+You'll receive webhook notifications when the withdrawal status changes:
+
+```json
+{
+  "event": "withdrawal.completed",
+  "timestamp": "2024-01-15T10:35:00Z",
+  "data": {
+    "withdrawalId": 67890,
+    "amount": 500.00,
+    "status": "completed",
+    "completedAt": "2024-01-15T10:34:45Z"
+  }
+}
+```
+
+Learn more about [webhooks](/webhooks).
+
+## Best practices
+
+<AccordionGroup>
+  <Accordion title="Always check balance first">
+    Verify you have sufficient available balance before requesting a withdrawal to avoid errors.
+  </Accordion>
+
+  <Accordion title="Validate PIX keys">
+    Ensure PIX keys are in the correct format for their type before submitting.
+  </Accordion>
+
+  <Accordion title="Use webhooks for status updates">
+    Don't poll for withdrawal status. Use webhooks to receive real-time notifications.
+  </Accordion>
+
+  <Accordion title="Handle errors gracefully">
+    Implement proper error handling and display user-friendly messages.
+  </Accordion>
+
+  <Accordion title="Keep withdrawal records">
+    Store withdrawal IDs and details for reconciliation and customer support.
+  </Accordion>
+</AccordionGroup>
+
+## Next steps
+
+- [Check account balance](/api-reference/account/balance)
+- [View transaction history](/api-reference/account/transactions)
+- [Set up webhooks](/webhooks) for withdrawal notifications
