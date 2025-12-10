@@ -15,11 +15,18 @@
         "tab": "Guias",
         "groups": [
           {
-            "group": "PrimePix",
+            "group": "Começando",
             "pages": [
               "index",
-              "getting-started",
+              "quickstart",
               "authentication"
+            ]
+          },
+          {
+            "group": "Recursos",
+            "pages": [
+              "webhooks",
+              "errors"
             ]
           }
         ]
