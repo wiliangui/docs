@@ -1,84 +1,170 @@
 ---
-title: API Reference
-description: Complete API documentation for PrimePix
+title: Introdução
+description: Bem-vindo à documentação da API PrimePix
 ---
 
-# API Reference
+# Introdução
 
-The PrimePix API is organized around REST principles. It uses standard HTTP methods, authentication, and response codes.
+Bem-vindo à documentação da API PrimePix!
 
-## Base URL
+Nossa API segue os padrões REST, com respostas em formato JSON e autenticação via API Key.
+
+## URL base
 
 ```
 https://api.primepix.me/v1
 ```
 
-## Authentication
+## Autenticação
 
-All API requests require authentication using API Key and API Secret headers:
-
-```bash
-X-API-Key: your_api_key
-X-API-Secret: your_api_secret
-```
-
-Learn more about [authentication](/authentication).
-
-## Request format
-
-All POST requests should include a `Content-Type: application/json` header and a JSON body.
+Para autenticar com nossa API, você deve passar sua **API Key** e **API Secret** nos headers de todas as requisições:
 
 ```bash
-curl -X POST https://api.primepix.me/v1/pix/create \
-  -H "X-API-Key: your_api_key" \
-  -H "X-API-Secret: your_api_secret" \
-  -H "Content-Type: application/json" \
-  -d '{"amount": 100.00}'
+X-API-Key: sua_api_key
+X-API-Secret: sua_api_secret
 ```
 
-## Response format
+Você pode encontrar suas chaves acessando o menu [Configurações → Credenciais de API](https://app.primepix.me/settings/credentials) no dashboard.
 
-All responses are returned in JSON format with a `success` field indicating the result:
+<Card title="Saiba mais sobre autenticação" icon="key" href="/api-reference/authentication">
+  Veja exemplos detalhados e boas práticas de segurança
+</Card>
 
-### Success response
+## Exemplo de requisição
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET https://api.primepix.me/v1/balance \
+  -H "X-API-Key: sua_api_key" \
+  -H "X-API-Secret: sua_api_secret"
+```
+
+```javascript Node.js
+const response = await fetch('https://api.primepix.me/v1/balance', {
+  headers: {
+    'X-API-Key': 'sua_api_key',
+    'X-API-Secret': 'sua_api_secret'
+  }
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://api.primepix.me/v1/balance',
+    headers={
+        'X-API-Key': 'sua_api_key',
+        'X-API-Secret': 'sua_api_secret'
+    }
+)
+
+data = response.json()
+print(data)
+```
+
+```php PHP
+<?php
+$ch = curl_init('https://api.primepix.me/v1/balance');
+
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'X-API-Key: sua_api_key',
+    'X-API-Secret: sua_api_secret'
+]);
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+$data = json_decode($response, true);
+print_r($data);
+?>
+```
+
+</CodeGroup>
+
+## Formato das respostas
+
+Todas as respostas seguem um formato padrão JSON:
+
+### Resposta de sucesso
 
 ```json
 {
   "success": true,
   "data": {
-    // Response data
+    // Dados da resposta
   }
 }
 ```
 
-### Error response
+### Resposta de erro
 
 ```json
 {
   "success": false,
-  "error": "Error message",
-  "code": "ERROR_CODE"
+  "error": "Mensagem de erro",
+  "code": "ERROR_CODE",
+  "details": {
+    // Detalhes adicionais do erro
+  }
 }
 ```
 
+## Códigos de status HTTP
+
+| Código | Descrição |
+|--------|-----------|
+| `200` | Sucesso - Requisição processada com sucesso |
+| `400` | Bad Request - Parâmetros inválidos |
+| `401` | Unauthorized - Credenciais inválidas ou ausentes |
+| `403` | Forbidden - Sem permissão para acessar o recurso |
+| `404` | Not Found - Recurso não encontrado |
+| `422` | Unprocessable Entity - Erro de validação |
+| `429` | Too Many Requests - Limite de requisições excedido |
+| `500` | Internal Server Error - Erro no servidor |
+| `503` | Service Unavailable - Serviço temporariamente indisponível |
+
 ## Rate limiting
 
-The API has rate limits to ensure fair usage:
+A API possui limites de requisições para garantir uso justo:
 
-- **100 requests per minute** per API key
-- **1000 requests per hour** per API key
+- **100 requisições por minuto** por API key
+- **1000 requisições por hora** por API key
 
-When you exceed the rate limit, you'll receive a `429 Too Many Requests` response.
+Quando o limite é excedido, você receberá um erro `429 Too Many Requests`:
 
-## Pagination
-
-List endpoints support pagination using `page` and `limit` query parameters:
-
-```bash
-GET /api/v1/transactions?page=1&limit=20
+```json
+{
+  "success": false,
+  "error": "Rate limit exceeded",
+  "code": "RATE_LIMIT_EXCEEDED",
+  "details": {
+    "retryAfter": 60
+  }
+}
 ```
 
-Response includes pagination metadata:
+O header `Retry-After` indica quantos segundos você deve aguardar antes de tentar novamente.
+
+## Paginação
+
+Endpoints que retornam listas suportam paginação via query parameters:
+
+```bash
+GET /v1/transactions?page=1&limit=20
+```
+
+### Parâmetros
+
+- `page` - Número da página (padrão: 1)
+- `limit` - Itens por página (padrão: 20, máximo: 100)
+
+### Resposta com paginação
 
 ```json
 {
@@ -93,28 +179,117 @@ Response includes pagination metadata:
 }
 ```
 
-## Endpoints
+## Ambientes
 
-### PIX payments
-
-- [POST /pix/create](/api-reference/pix/create) - Create a PIX charge
-- [GET /pix/status/{id}](/api-reference/pix/status) - Get payment status
-
-### Account management
-
-- [GET /balance](/api-reference/account/balance) - Get account balance
-- [GET /transactions](/api-reference/account/transactions) - List transactions
-- [POST /withdraw](/api-reference/account/withdraw) - Request withdrawal
-
-## Testing
-
-Use these test credentials in development:
+### Produção
 
 ```
-X-API-Key: test_key_123456
-X-API-Secret: test_secret_123456
+https://api.primepix.me/v1
 ```
 
-<Warning>
-  Never use test credentials in production. Always use your production API keys.
-</Warning>
+Ambiente de produção com transações reais.
+
+### Sandbox
+
+```
+https://sandbox.api.primepix.me/v1
+```
+
+Ambiente de testes onde você pode simular transações sem movimentar dinheiro real.
+
+<Info>
+  **Solicite acesso ao sandbox**
+  
+  Entre em contato com o suporte para obter credenciais de sandbox e testar sua integração.
+</Info>
+
+## Recursos principais
+
+<CardGroup cols={2}>
+  <Card title="Transações PIX" icon="qrcode" href="/api-reference/pix/create">
+    Crie cobranças PIX e receba pagamentos instantâneos
+  </Card>
+  
+  <Card title="Consultar saldo" icon="wallet" href="/api-reference/account/balance">
+    Verifique seu saldo disponível e pendente
+  </Card>
+  
+  <Card title="Listar transações" icon="list" href="/api-reference/account/transactions">
+    Acesse o histórico completo de transações
+  </Card>
+  
+  <Card title="Saques" icon="money-bill-transfer" href="/api-reference/account/withdraw">
+    Transfira fundos para chaves PIX
+  </Card>
+</CardGroup>
+
+## Webhooks
+
+Configure webhooks para receber notificações em tempo real sobre eventos importantes:
+
+- Pagamentos confirmados
+- Pagamentos falhados
+- Saques processados
+- Saques falhados
+
+<Card title="Configurar webhooks" icon="webhook" href="/api-reference/webhooks">
+  Aprenda a receber notificações em tempo real
+</Card>
+
+## Objetos da API
+
+Entenda a estrutura dos objetos retornados pela API:
+
+<CardGroup cols={3}>
+  <Card title="Transaction" icon="receipt" href="/api-reference/objects/transaction">
+    Objeto de transação PIX
+  </Card>
+  
+  <Card title="Customer" icon="user" href="/api-reference/objects/customer">
+    Dados do cliente
+  </Card>
+  
+  <Card title="PIX" icon="qrcode" href="/api-reference/objects/pix">
+    Informações específicas do PIX
+  </Card>
+</CardGroup>
+
+## Bibliotecas e SDKs
+
+Em breve disponibilizaremos SDKs oficiais para facilitar a integração:
+
+- Node.js / TypeScript
+- Python
+- PHP
+- Ruby
+- Go
+
+Enquanto isso, você pode usar qualquer cliente HTTP para fazer requisições à API.
+
+## Suporte
+
+Precisa de ajuda? Entre em contato:
+
+- **Email**: [support@primepix.me](mailto:support@primepix.me)
+- **Dashboard**: [app.primepix.me](https://app.primepix.me)
+- **Documentação**: [docs.primepix.me](https://docs.primepix.me)
+
+## Próximos passos
+
+<Steps>
+  <Step title="Obtenha suas credenciais">
+    Acesse o dashboard e copie sua API Key e API Secret
+  </Step>
+  
+  <Step title="Faça sua primeira requisição">
+    Teste a autenticação consultando seu saldo
+  </Step>
+  
+  <Step title="Crie uma cobrança PIX">
+    Gere seu primeiro QR Code e receba um pagamento
+  </Step>
+  
+  <Step title="Configure webhooks">
+    Receba notificações em tempo real sobre pagamentos
+  </Step>
+</Steps>
