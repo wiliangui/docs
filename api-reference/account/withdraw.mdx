@@ -83,7 +83,7 @@ Requests a withdrawal of funds from your account to a PIX key.
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://your-domain.com/api/v1/withdraw \
+curl -X POST https://api.primepix.me/v1/withdraw \
   -H "X-API-Key: your_api_key" \
   -H "X-API-Secret: your_api_secret" \
   -H "Content-Type: application/json" \
@@ -95,7 +95,7 @@ curl -X POST https://your-domain.com/api/v1/withdraw \
 ```
 
 ```javascript Node.js
-const response = await fetch('https://your-domain.com/api/v1/withdraw', {
+const response = await fetch('https://api.primepix.me/v1/withdraw', {
   method: 'POST',
   headers: {
     'X-API-Key': 'your_api_key',
@@ -117,7 +117,7 @@ console.log(data);
 import requests
 
 response = requests.post(
-    'https://your-domain.com/api/v1/withdraw',
+    'https://api.primepix.me/v1/withdraw',
     headers={
         'X-API-Key': 'your_api_key',
         'X-API-Secret': 'your_api_secret',
@@ -136,7 +136,7 @@ print(data)
 
 ```php PHP
 <?php
-$ch = curl_init('https://your-domain.com/api/v1/withdraw');
+$ch = curl_init('https://api.primepix.me/v1/withdraw');
 
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -289,7 +289,7 @@ Withdrawals typically complete within a few minutes, but may take up to 24 hours
 ```javascript Node.js
 async function safeWithdraw(amount, pixKey, pixKeyType) {
   // Check balance first
-  const balanceResponse = await fetch('https://your-domain.com/api/v1/balance', {
+  const balanceResponse = await fetch('https://api.primepix.me/v1/balance', {
     headers: {
       'X-API-Key': process.env.PRIMEPIX_API_KEY,
       'X-API-Secret': process.env.PRIMEPIX_API_SECRET
@@ -305,7 +305,7 @@ async function safeWithdraw(amount, pixKey, pixKeyType) {
   }
   
   // Proceed with withdrawal
-  const withdrawResponse = await fetch('https://your-domain.com/api/v1/withdraw', {
+  const withdrawResponse = await fetch('https://api.primepix.me/v1/withdraw', {
     method: 'POST',
     headers: {
       'X-API-Key': process.env.PRIMEPIX_API_KEY,
