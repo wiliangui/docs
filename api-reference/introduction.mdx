@@ -1,33 +1,120 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: API Reference
+description: Complete API documentation for PrimePix
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+# API Reference
 
-## Welcome
+The PrimePix API is organized around REST principles. It uses standard HTTP methods, authentication, and response codes.
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+## Base URL
 
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
-</Card>
+```
+https://your-domain.com/api/v1
+```
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+All API requests require authentication using API Key and API Secret headers:
+
+```bash
+X-API-Key: your_api_key
+X-API-Secret: your_api_secret
+```
+
+Learn more about [authentication](/authentication).
+
+## Request format
+
+All POST requests should include a `Content-Type: application/json` header and a JSON body.
+
+```bash
+curl -X POST https://your-domain.com/api/v1/pix/create \
+  -H "X-API-Key: your_api_key" \
+  -H "X-API-Secret: your_api_secret" \
+  -H "Content-Type: application/json" \
+  -d '{"amount": 100.00}'
+```
+
+## Response format
+
+All responses are returned in JSON format with a `success` field indicating the result:
+
+### Success response
 
 ```json
-"security": [
-  {
-    "bearerAuth": []
+{
+  "success": true,
+  "data": {
+    // Response data
   }
-]
+}
 ```
+
+### Error response
+
+```json
+{
+  "success": false,
+  "error": "Error message",
+  "code": "ERROR_CODE"
+}
+```
+
+## Rate limiting
+
+The API has rate limits to ensure fair usage:
+
+- **100 requests per minute** per API key
+- **1000 requests per hour** per API key
+
+When you exceed the rate limit, you'll receive a `429 Too Many Requests` response.
+
+## Pagination
+
+List endpoints support pagination using `page` and `limit` query parameters:
+
+```bash
+GET /api/v1/transactions?page=1&limit=20
+```
+
+Response includes pagination metadata:
+
+```json
+{
+  "success": true,
+  "data": [...],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 150,
+    "totalPages": 8
+  }
+}
+```
+
+## Endpoints
+
+### PIX payments
+
+- [POST /pix/create](/api-reference/pix/create) - Create a PIX charge
+- [GET /pix/status/{id}](/api-reference/pix/status) - Get payment status
+
+### Account management
+
+- [GET /balance](/api-reference/account/balance) - Get account balance
+- [GET /transactions](/api-reference/account/transactions) - List transactions
+- [POST /withdraw](/api-reference/account/withdraw) - Request withdrawal
+
+## Testing
+
+Use these test credentials in development:
+
+```
+X-API-Key: test_key_123456
+X-API-Secret: test_secret_123456
+```
+
+<Warning>
+  Never use test credentials in production. Always use your production API keys.
+</Warning>
