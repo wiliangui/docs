@@ -1,0 +1,146 @@
+---
+title: Authentication
+description: Learn how to authenticate your API requests
+---
+
+# Authentication
+
+The PrimePix API uses API Key and API Secret authentication to secure all requests.
+
+## Getting your credentials
+
+You can find your API credentials in your PrimePix dashboard:
+
+1. Log in to your account
+2. Navigate to Settings > API Credentials
+3. Copy your API Key and API Secret
+
+<Warning>
+  Keep your API Secret secure and never share it publicly. Treat it like a password.
+</Warning>
+
+## Making authenticated requests
+
+Include your credentials in the request headers:
+
+```bash
+X-API-Key: your_api_key
+X-API-Secret: your_api_secret
+```
+
+### Example request
+
+```bash cURL
+curl -X GET https://your-domain.com/api/v1/balance \
+  -H "X-API-Key: your_api_key" \
+  -H "X-API-Secret: your_api_secret"
+```
+
+```javascript Node.js
+const response = await fetch('https://your-domain.com/api/v1/balance', {
+  headers: {
+    'X-API-Key': 'your_api_key',
+    'X-API-Secret': 'your_api_secret'
+  }
+});
+
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://your-domain.com/api/v1/balance',
+    headers={
+        'X-API-Key': 'your_api_key',
+        'X-API-Secret': 'your_api_secret'
+    }
+)
+
+data = response.json()
+```
+
+```php PHP
+<?php
+$ch = curl_init('https://your-domain.com/api/v1/balance');
+
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'X-API-Key: your_api_key',
+    'X-API-Secret: your_api_secret'
+]);
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+$data = json_decode($response, true);
+?>
+```
+
+## Authentication errors
+
+If authentication fails, you'll receive a `401 Unauthorized` response:
+
+```json
+{
+  "success": false,
+  "error": "Invalid API credentials"
+}
+```
+
+Common authentication errors:
+
+- **Missing credentials**: One or both headers are not included
+- **Invalid credentials**: The API Key or Secret is incorrect
+- **Expired credentials**: Your credentials have been revoked or expired
+
+## Best practices
+
+<AccordionGroup>
+  <Accordion title="Store credentials securely">
+    Never hardcode your API credentials in your source code. Use environment variables or a secure configuration management system.
+  </Accordion>
+
+  <Accordion title="Use different credentials for testing">
+    Create separate API credentials for development, staging, and production environments.
+  </Accordion>
+
+  <Accordion title="Rotate credentials regularly">
+    Periodically generate new API credentials and update your applications to use them.
+  </Accordion>
+
+  <Accordion title="Monitor API usage">
+    Regularly check your API usage logs to detect any unauthorized access.
+  </Accordion>
+</AccordionGroup>
+
+## Environment variables
+
+Store your credentials as environment variables:
+
+```bash .env
+PRIMEPIX_API_KEY=your_api_key
+PRIMEPIX_API_SECRET=your_api_secret
+```
+
+Then reference them in your code:
+
+```javascript Node.js
+const apiKey = process.env.PRIMEPIX_API_KEY;
+const apiSecret = process.env.PRIMEPIX_API_SECRET;
+```
+
+```python Python
+import os
+
+api_key = os.getenv('PRIMEPIX_API_KEY')
+api_secret = os.getenv('PRIMEPIX_API_SECRET')
+```
+
+```php PHP
+<?php
+$apiKey = getenv('PRIMEPIX_API_KEY');
+$apiSecret = getenv('PRIMEPIX_API_SECRET');
+?>
+```
