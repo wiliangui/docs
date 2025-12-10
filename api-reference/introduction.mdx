@@ -10,7 +10,7 @@ The PrimePix API is organized around REST principles. It uses standard HTTP meth
 ## Base URL
 
 ```
-https://your-domain.com/api/v1
+https://api.primepix.me/v1
 ```
 
 ## Authentication
@@ -29,7 +29,7 @@ Learn more about [authentication](/authentication).
 All POST requests should include a `Content-Type: application/json` header and a JSON body.
 
 ```bash
-curl -X POST https://your-domain.com/api/v1/pix/create \
+curl -X POST https://api.primepix.me/v1/pix/create \
   -H "X-API-Key: your_api_key" \
   -H "X-API-Secret: your_api_secret" \
   -H "Content-Type: application/json" \
