@@ -1,0 +1,229 @@
+---
+title: Objeto pix
+description: Estrutura do objeto com informações específicas do PIX
+---
+
+# Objeto pix
+
+Contém informações específicas da transação PIX, incluindo identificadores do Banco Central e dados do pagador.
+
+## Estrutura
+
+```json
+{
+  "endToEndId": "E12345678202401151030123456789",
+  "txId": "7d9f0335d46d4fe4bc55b5c17f",
+  "payer": {
+    "name": "João Silva",
+    "document": "12345678900",
+    "bank": "Banco do Brasil",
+    "branch": "0001",
+    "account": "12345-6"
+  }
+}
+```
+
+## Propriedades
+
+<ResponseField name="endToEndId" type="string">
+  Identificador fim a fim (E2E ID) da transação PIX no Banco Central.
+  
+  Formato: `E{ISPB}{AAAAMMDD}{HHmmss}{sequencial}`
+  
+  Este ID é único para cada transação PIX no Brasil e permite rastreamento completo.
+</ResponseField>
+
+<ResponseField name="txId" type="string">
+  Identificador da transação (TxID) gerado pelo sistema.
+  
+  String alfanumérica de 26 a 35 caracteres usada para identificar a cobrança PIX.
+</ResponseField>
+
+<ResponseField name="payer" type="object">
+  Informações do pagador (disponível apenas após o pagamento ser confirmado).
+  
+  <Expandable title="payer properties">
+    <ResponseField name="name" type="string">
+      Nome completo do pagador.
+    </ResponseField>
+    
+    <ResponseField name="document" type="string">
+      CPF ou CNPJ do pagador.
+    </ResponseField>
+    
+    <ResponseField name="bank" type="string">
+      Nome do banco do pagador.
+    </ResponseField>
+    
+    <ResponseField name="branch" type="string">
+      Agência bancária do pagador.
+    </ResponseField>
+    
+    <ResponseField name="account" type="string">
+      Número da conta do pagador.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Quando os dados estão disponíveis
+
+### Antes do pagamento (status: pending)
+
+```json
+{
+  "txId": "7d9f0335d46d4fe4bc55b5c17f",
+  "endToEndId": null,
+  "payer": null
+}
+```
+
+Apenas o `txId` está disponível. Os dados do pagador e o `endToEndId` são preenchidos após a confirmação do pagamento.
+
+### Após o pagamento (status: completed)
+
+```json
+{
+  "txId": "7d9f0335d46d4fe4bc55b5c17f",
+  "endToEndId": "E12345678202401151030123456789",
+  "payer": {
+    "name": "João Silva",
+    "document": "12345678900",
+    "bank": "Banco do Brasil",
+    "branch": "0001",
+    "account": "12345-6"
+  }
+}
+```
+
+Todos os dados estão disponíveis após a confirmação do pagamento pelo Banco Central.
+
+## End-to-End ID (E2E ID)
+
+O End-to-End ID é um identificador único nacional para transações PIX, composto por:
+
+- **E** - Prefixo fixo
+- **ISPB** - Código de 8 dígitos do participante (banco)
+- **AAAAMMDD** - Data da transação
+- **HHmmss** - Hora da transação
+- **Sequencial** - Número sequencial único
+
+### Exemplo de E2E ID
+
+```
+E12345678202401151030123456789
+│└──────┘└──────┘└────┘└─────────┘
+│   │       │      │        │
+│   │       │      │        └─ Sequencial
+│   │       │      └────────── Hora (10:30:00)
+│   │       └───────────────── Data (2024-01-15)
+│   └───────────────────────── ISPB do banco
+└───────────────────────────── Prefixo fixo
+```
+
+## Exemplo de uso
+
+### Rastrear pagamento pelo E2E ID
+
+```javascript Node.js
+async function trackPayment(transactionId) {
+  const response = await fetch(
+    `https://api.primepix.me/v1/pix/status/${transactionId}`,
+    {
+      headers: {
+        'X-API-Key': 'your_api_key',
+        'X-API-Secret': 'your_api_secret'
+      }
+    }
+  );
+  
+  const { data } = await response.json();
+  
+  if (data.status === 'completed' && data.pix) {
+    console.log('Pagamento confirmado!');
+    console.log('E2E ID:', data.pix.endToEndId);
+    console.log('Pagador:', data.pix.payer.name);
+    console.log('Banco:', data.pix.payer.bank);
+    
+    // Use o E2E ID para rastreamento ou conciliação
+    await saveToDatabase({
+      transactionId: data.transactionId,
+      endToEndId: data.pix.endToEndId,
+      payerDocument: data.pix.payer.document
+    });
+  }
+}
+```
+
+### Verificar dados do pagador
+
+```python Python
+import requests
+
+def verify_payer(transaction_id):
+    response = requests.get(
+        f'https://api.primepix.me/v1/pix/status/{transaction_id}',
+        headers={
+            'X-API-Key': 'your_api_key',
+            'X-API-Secret': 'your_api_secret'
+        }
+    )
+    
+    data = response.json()['data']
+    
+    if data['status'] == 'completed' and data.get('pix'):
+        payer = data['pix']['payer']
+        
+        # Verificar se o pagador é o esperado
+        expected_document = '12345678900'
+        if payer['document'] == expected_document:
+            print('Pagador verificado com sucesso!')
+            return True
+        else:
+            print(f'Atenção: Pagador diferente do esperado')
+            print(f'Esperado: {expected_document}')
+            print(f'Recebido: {payer["document"]}')
+            return False
+    
+    return False
+```
+
+## Casos de uso
+
+<AccordionGroup>
+  <Accordion title="Conciliação bancária">
+    Use o `endToEndId` para conciliar pagamentos PIX com seu extrato bancário. Este ID é único e aparece em ambos os sistemas.
+  </Accordion>
+
+  <Accordion title="Verificação de pagador">
+    Valide se o pagador é quem você espera comparando o CPF/CNPJ do objeto `payer` com seus registros.
+  </Accordion>
+
+  <Accordion title="Auditoria e compliance">
+    Armazene o `endToEndId` e dados do pagador para fins de auditoria e conformidade com regulamentações.
+  </Accordion>
+
+  <Accordion title="Suporte ao cliente">
+    Use o `endToEndId` para rastrear pagamentos quando clientes entrarem em contato com dúvidas.
+  </Accordion>
+</AccordionGroup>
+
+## Importante
+
+<Warning>
+  **Dados do pagador disponíveis apenas após pagamento**
+  
+  As informações do pagador (`payer`) e o `endToEndId` só ficam disponíveis após a confirmação do pagamento pelo Banco Central. Não tente acessar esses dados em transações com status `pending`.
+</Warning>
+
+<Info>
+  **E2E ID é único nacionalmente**
+  
+  O End-to-End ID é único em todo o sistema PIX brasileiro. Você pode usá-lo para rastrear a transação em qualquer banco ou instituição financeira.
+</Info>
+
+## Relacionado
+
+- [Objeto transaction](/api-reference/objects/transaction)
+- [Consultar status](/api-reference/pix/status)
+- [Webhooks](/api-reference/webhooks)
+- [Banco Central - PIX](https://www.bcb.gov.br/estabilidadefinanceira/pix)
