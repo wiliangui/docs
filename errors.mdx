@@ -1,0 +1,300 @@
+---
+title: Error handling
+description: Learn how to handle errors in the PrimePix API
+---
+
+# Error handling
+
+The PrimePix API uses standard HTTP status codes to indicate the success or failure of requests.
+
+## HTTP status codes
+
+| Status Code | Description |
+|-------------|-------------|
+| `200` | Success - Request completed successfully |
+| `400` | Bad Request - Invalid request parameters |
+| `401` | Unauthorized - Invalid or missing API credentials |
+| `403` | Forbidden - You don't have permission to access this resource |
+| `404` | Not Found - The requested resource doesn't exist |
+| `422` | Unprocessable Entity - Validation error |
+| `429` | Too Many Requests - Rate limit exceeded |
+| `500` | Internal Server Error - Something went wrong on our end |
+| `503` | Service Unavailable - Temporary server issue |
+
+## Error response format
+
+All error responses follow this format:
+
+```json
+{
+  "success": false,
+  "error": "Error message describing what went wrong",
+  "code": "ERROR_CODE",
+  "details": {
+    "field": "Additional error details"
+  }
+}
+```
+
+## Common errors
+
+### Authentication errors
+
+#### Invalid credentials
+
+```json
+{
+  "success": false,
+  "error": "Invalid API credentials",
+  "code": "INVALID_CREDENTIALS"
+}
+```
+
+**Solution**: Verify your API Key and API Secret are correct.
+
+#### Missing credentials
+
+```json
+{
+  "success": false,
+  "error": "Missing authentication headers",
+  "code": "MISSING_CREDENTIALS"
+}
+```
+
+**Solution**: Include both `X-API-Key` and `X-API-Secret` headers in your request.
+
+### Validation errors
+
+#### Missing required field
+
+```json
+{
+  "success": false,
+  "error": "Validation failed",
+  "code": "VALIDATION_ERROR",
+  "details": {
+    "amount": "Amount is required"
+  }
+}
+```
+
+**Solution**: Ensure all required fields are included in your request.
+
+#### Invalid field value
+
+```json
+{
+  "success": false,
+  "error": "Validation failed",
+  "code": "VALIDATION_ERROR",
+  "details": {
+    "amount": "Amount must be greater than 0"
+  }
+}
+```
+
+**Solution**: Check that field values meet the API requirements.
+
+### Business logic errors
+
+#### Insufficient balance
+
+```json
+{
+  "success": false,
+  "error": "Insufficient balance for withdrawal",
+  "code": "INSUFFICIENT_BALANCE"
+}
+```
+
+**Solution**: Check your account balance before requesting a withdrawal.
+
+#### Transaction not found
+
+```json
+{
+  "success": false,
+  "error": "Transaction not found",
+  "code": "TRANSACTION_NOT_FOUND"
+}
+```
+
+**Solution**: Verify the transaction ID is correct.
+
+#### Duplicate transaction
+
+```json
+{
+  "success": false,
+  "error": "Transaction with this external ID already exists",
+  "code": "DUPLICATE_TRANSACTION"
+}
+```
+
+**Solution**: Use a unique `externalId` for each transaction.
+
+### Rate limiting
+
+```json
+{
+  "success": false,
+  "error": "Rate limit exceeded",
+  "code": "RATE_LIMIT_EXCEEDED",
+  "details": {
+    "retryAfter": 60
+  }
+}
+```
+
+**Solution**: Wait for the specified time before making another request.
+
+## Error handling best practices
+
+<AccordionGroup>
+  <Accordion title="Always check the response status">
+    Check the HTTP status code and the `success` field in the response before processing data.
+  </Accordion>
+
+  <Accordion title="Log errors for debugging">
+    Log error responses to help troubleshoot issues in production.
+  </Accordion>
+
+  <Accordion title="Implement retry logic">
+    For `500` and `503` errors, implement exponential backoff retry logic.
+  </Accordion>
+
+  <Accordion title="Handle validation errors gracefully">
+    Display validation errors to users in a user-friendly format.
+  </Accordion>
+
+  <Accordion title="Monitor error rates">
+    Track error rates to identify and fix issues quickly.
+  </Accordion>
+</AccordionGroup>
+
+## Example error handling
+
+```javascript Node.js
+async function createPixCharge(data) {
+  try {
+    const response = await fetch('https://your-domain.com/api/v1/pix/create', {
+      method: 'POST',
+      headers: {
+        'X-API-Key': process.env.PRIMEPIX_API_KEY,
+        'X-API-Secret': process.env.PRIMEPIX_API_SECRET,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.error || 'Request failed');
+    }
+
+    return result.data;
+  } catch (error) {
+    console.error('Error creating PIX charge:', error.message);
+    throw error;
+  }
+}
+```
+
+```python Python
+import requests
+import time
+
+def create_pix_charge(data, max_retries=3):
+    url = 'https://your-domain.com/api/v1/pix/create'
+    headers = {
+        'X-API-Key': os.getenv('PRIMEPIX_API_KEY'),
+        'X-API-Secret': os.getenv('PRIMEPIX_API_SECRET'),
+        'Content-Type': 'application/json'
+    }
+
+    for attempt in range(max_retries):
+        try:
+            response = requests.post(url, headers=headers, json=data)
+            result = response.json()
+
+            if response.status_code == 200 and result.get('success'):
+                return result['data']
+
+            # Handle specific errors
+            if response.status_code == 401:
+                raise Exception('Invalid API credentials')
+            elif response.status_code == 422:
+                raise Exception(f"Validation error: {result.get('error')}")
+            elif response.status_code >= 500:
+                # Retry on server errors
+                if attempt < max_retries - 1:
+                    time.sleep(2 ** attempt)  # Exponential backoff
+                    continue
+                raise Exception('Server error')
+
+            raise Exception(result.get('error', 'Request failed'))
+
+        except requests.RequestException as e:
+            if attempt < max_retries - 1:
+                time.sleep(2 ** attempt)
+                continue
+            raise Exception(f'Network error: {str(e)}')
+
+    raise Exception('Max retries exceeded')
+```
+
+```php PHP
+<?php
+function createPixCharge($data, $maxRetries = 3) {
+    $url = 'https://your-domain.com/api/v1/pix/create';
+    $headers = [
+        'X-API-Key: ' . getenv('PRIMEPIX_API_KEY'),
+        'X-API-Secret: ' . getenv('PRIMEPIX_API_SECRET'),
+        'Content-Type: application/json'
+    ];
+
+    for ($attempt = 0; $attempt < $maxRetries; $attempt++) {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+
+        $response = curl_exec($ch);
+        $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        $result = json_decode($response, true);
+
+        if ($statusCode === 200 && $result['success']) {
+            return $result['data'];
+        }
+
+        // Handle specific errors
+        if ($statusCode === 401) {
+            throw new Exception('Invalid API credentials');
+        } elseif ($statusCode === 422) {
+            throw new Exception('Validation error: ' . $result['error']);
+        } elseif ($statusCode >= 500 && $attempt < $maxRetries - 1) {
+            // Retry on server errors
+            sleep(pow(2, $attempt));
+            continue;
+        }
+
+        throw new Exception($result['error'] ?? 'Request failed');
+    }
+
+    throw new Exception('Max retries exceeded');
+}
+?>
+```
+
+## Getting help
+
+If you encounter an error that you can't resolve:
+
+1. Check this documentation for common errors and solutions
+2. Review your request parameters and authentication
+3. Contact our support team with the error details and request ID
