@@ -1,0 +1,243 @@
+---
+title: Autenticação
+description: Como autenticar suas requisições na API PrimePix
+---
+
+# Autenticação
+
+A API PrimePix utiliza autenticação via **API Key** e **API Secret** nos headers das requisições.
+
+## Obtendo suas credenciais
+
+Você pode encontrar suas chaves de API acessando:
+
+1. Faça login no [Dashboard PrimePix](https://app.primepix.me)
+2. Navegue até **Configurações → Credenciais de API**
+3. Copie sua **API Key** e **API Secret**
+
+<Warning>
+  **Mantenha suas credenciais seguras**
+  
+  Nunca compartilhe sua API Secret publicamente ou em repositórios de código. Trate-a como uma senha.
+</Warning>
+
+## Como autenticar
+
+Inclua suas credenciais nos headers de todas as requisições:
+
+```bash
+X-API-Key: sua_api_key
+X-API-Secret: sua_api_secret
+```
+
+## Exemplos
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET https://api.primepix.me/v1/balance \
+  -H "X-API-Key: sua_api_key" \
+  -H "X-API-Secret: sua_api_secret"
+```
+
+```javascript Node.js
+const response = await fetch('https://api.primepix.me/v1/balance', {
+  headers: {
+    'X-API-Key': 'sua_api_key',
+    'X-API-Secret': 'sua_api_secret'
+  }
+});
+
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://api.primepix.me/v1/balance',
+    headers={
+        'X-API-Key': 'sua_api_key',
+        'X-API-Secret': 'sua_api_secret'
+    }
+)
+
+data = response.json()
+```
+
+```php PHP
+<?php
+$ch = curl_init('https://api.primepix.me/v1/balance');
+
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'X-API-Key: sua_api_key',
+    'X-API-Secret: sua_api_secret'
+]);
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+$data = json_decode($response, true);
+?>
+```
+
+</CodeGroup>
+
+## Variáveis de ambiente
+
+Armazene suas credenciais como variáveis de ambiente:
+
+```bash .env
+PRIMEPIX_API_KEY=sua_api_key
+PRIMEPIX_API_SECRET=sua_api_secret
+```
+
+### Node.js
+
+```javascript
+const apiKey = process.env.PRIMEPIX_API_KEY;
+const apiSecret = process.env.PRIMEPIX_API_SECRET;
+
+const response = await fetch('https://api.primepix.me/v1/balance', {
+  headers: {
+    'X-API-Key': apiKey,
+    'X-API-Secret': apiSecret
+  }
+});
+```
+
+### Python
+
+```python
+import os
+
+api_key = os.getenv('PRIMEPIX_API_KEY')
+api_secret = os.getenv('PRIMEPIX_API_SECRET')
+
+response = requests.get(
+    'https://api.primepix.me/v1/balance',
+    headers={
+        'X-API-Key': api_key,
+        'X-API-Secret': api_secret
+    }
+)
+```
+
+### PHP
+
+```php
+<?php
+$apiKey = getenv('PRIMEPIX_API_KEY');
+$apiSecret = getenv('PRIMEPIX_API_SECRET');
+
+$ch = curl_init('https://api.primepix.me/v1/balance');
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    "X-API-Key: {$apiKey}",
+    "X-API-Secret: {$apiSecret}"
+]);
+?>
+```
+
+## Erros de autenticação
+
+### Credenciais inválidas
+
+```json
+{
+  "success": false,
+  "error": "Invalid API credentials",
+  "code": "INVALID_CREDENTIALS"
+}
+```
+
+**Status HTTP:** `401 Unauthorized`
+
+**Solução:** Verifique se sua API Key e API Secret estão corretas.
+
+### Credenciais ausentes
+
+```json
+{
+  "success": false,
+  "error": "Missing authentication headers",
+  "code": "MISSING_CREDENTIALS"
+}
+```
+
+**Status HTTP:** `401 Unauthorized`
+
+**Solução:** Certifique-se de incluir ambos os headers `X-API-Key` e `X-API-Secret`.
+
+### Credenciais expiradas
+
+```json
+{
+  "success": false,
+  "error": "API credentials expired",
+  "code": "EXPIRED_CREDENTIALS"
+}
+```
+
+**Status HTTP:** `401 Unauthorized`
+
+**Solução:** Gere novas credenciais no dashboard.
+
+## Ambientes
+
+### Produção
+
+```
+Base URL: https://api.primepix.me/v1
+```
+
+Use suas credenciais de **produção** obtidas no dashboard principal.
+
+### Sandbox (Testes)
+
+```
+Base URL: https://sandbox.api.primepix.me/v1
+```
+
+Use suas credenciais de **sandbox** para testes. Transações no sandbox não movimentam dinheiro real.
+
+<Info>
+  **Modo sandbox**
+  
+  No ambiente sandbox, você pode simular pagamentos e testar toda a integração sem custos. Solicite acesso ao sandbox através do suporte.
+</Info>
+
+## Boas práticas
+
+<AccordionGroup>
+  <Accordion title="Use variáveis de ambiente">
+    Nunca hardcode suas credenciais no código. Use variáveis de ambiente ou gerenciadores de secrets.
+  </Accordion>
+
+  <Accordion title="Credenciais diferentes por ambiente">
+    Mantenha credenciais separadas para desenvolvimento, staging e produção.
+  </Accordion>
+
+  <Accordion title="Rotação de credenciais">
+    Gere novas credenciais periodicamente e revogue as antigas.
+  </Accordion>
+
+  <Accordion title="Monitore o uso">
+    Acompanhe o uso da API no dashboard para detectar acessos não autorizados.
+  </Accordion>
+
+  <Accordion title="Restrinja por IP (opcional)">
+    Configure whitelist de IPs no dashboard para maior segurança.
+  </Accordion>
+</AccordionGroup>
+
+## Próximos passos
+
+<CardGroup cols={2}>
+  <Card title="Criar transação PIX" icon="qrcode" href="/api-reference/pix/create">
+    Faça sua primeira cobrança PIX
+  </Card>
+  <Card title="Webhooks" icon="webhook" href="/api-reference/webhooks">
+    Configure notificações em tempo real
+  </Card>
+</CardGroup>
