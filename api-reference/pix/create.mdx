@@ -1,0 +1,274 @@
+---
+title: Create PIX charge
+description: Generate a QR Code PIX for receiving payments
+---
+
+# Create PIX charge
+
+`POST /api/v1/pix/create`
+
+Generates a PIX QR Code for receiving payments from customers.
+
+## Request
+
+### Headers
+
+| Header | Type | Required | Description |
+|--------|------|----------|-------------|
+| `X-API-Key` | string | Yes | Your API key |
+| `X-API-Secret` | string | Yes | Your API secret |
+| `Content-Type` | string | Yes | Must be `application/json` |
+
+### Body parameters
+
+<ParamField body="amount" type="number" required>
+  The charge amount in Brazilian Reais (BRL).
+</ParamField>
+
+<ParamField body="externalId" type="string">
+  Your internal reference ID for this transaction. Must be unique.
+</ParamField>
+
+<ParamField body="description" type="string">
+  Description of the charge that will be displayed to the customer.
+</ParamField>
+
+<ParamField body="customer" type="object">
+  Customer information for the transaction.
+  
+  <Expandable title="customer properties">
+    <ParamField body="name" type="string">
+      Customer's full name.
+    </ParamField>
+    
+    <ParamField body="document" type="string">
+      Customer's CPF or CNPJ (numbers only).
+    </ParamField>
+    
+    <ParamField body="email" type="string">
+      Customer's email address.
+    </ParamField>
+    
+    <ParamField body="phone" type="string">
+      Customer's phone number with country code.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## Response
+
+<ResponseField name="success" type="boolean">
+  Indicates if the request was successful.
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  The charge data.
+  
+  <Expandable title="data properties">
+    <ResponseField name="transactionId" type="integer">
+      Unique transaction identifier.
+    </ResponseField>
+    
+    <ResponseField name="qrCode" type="string">
+      PIX code string for copy/paste payment.
+    </ResponseField>
+    
+    <ResponseField name="qrCodeBase64" type="string">
+      Base64-encoded QR code image.
+    </ResponseField>
+    
+    <ResponseField name="amount" type="number">
+      The charge amount.
+    </ResponseField>
+    
+    <ResponseField name="fee" type="number">
+      Transaction fee charged.
+    </ResponseField>
+    
+    <ResponseField name="netAmount" type="number">
+      Net amount you'll receive (amount - fee).
+    </ResponseField>
+    
+    <ResponseField name="status" type="string">
+      Current transaction status. Initially `pending`.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Example
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://your-domain.com/api/v1/pix/create \
+  -H "X-API-Key: your_api_key" \
+  -H "X-API-Secret: your_api_secret" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 100.00,
+    "description": "Payment for order #123",
+    "externalId": "order_123",
+    "customer": {
+      "name": "João Silva",
+      "document": "12345678900",
+      "email": "joao@example.com",
+      "phone": "+5511999999999"
+    }
+  }'
+```
+
+```javascript Node.js
+const response = await fetch('https://your-domain.com/api/v1/pix/create', {
+  method: 'POST',
+  headers: {
+    'X-API-Key': 'your_api_key',
+    'X-API-Secret': 'your_api_secret',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    amount: 100.00,
+    description: 'Payment for order #123',
+    externalId: 'order_123',
+    customer: {
+      name: 'João Silva',
+      document: '12345678900',
+      email: 'joao@example.com',
+      phone: '+5511999999999'
+    }
+  })
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://your-domain.com/api/v1/pix/create',
+    headers={
+        'X-API-Key': 'your_api_key',
+        'X-API-Secret': 'your_api_secret',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'amount': 100.00,
+        'description': 'Payment for order #123',
+        'externalId': 'order_123',
+        'customer': {
+            'name': 'João Silva',
+            'document': '12345678900',
+            'email': 'joao@example.com',
+            'phone': '+5511999999999'
+        }
+    }
+)
+
+data = response.json()
+print(data)
+```
+
+```php PHP
+<?php
+$ch = curl_init('https://your-domain.com/api/v1/pix/create');
+
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'X-API-Key: your_api_key',
+    'X-API-Secret: your_api_secret',
+    'Content-Type: application/json'
+]);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
+    'amount' => 100.00,
+    'description' => 'Payment for order #123',
+    'externalId' => 'order_123',
+    'customer' => [
+        'name' => 'João Silva',
+        'document' => '12345678900',
+        'email' => 'joao@example.com',
+        'phone' => '+5511999999999'
+    ]
+]));
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+$data = json_decode($response, true);
+print_r($data);
+?>
+```
+
+</CodeGroup>
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "transactionId": 12345,
+    "qrCode": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d3-a456-426655440000520400005303986540510.005802BR5913João Silva6009SAO PAULO62070503***63041D3D",
+    "qrCodeBase64": "iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAYAAAB5fY51AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAA...",
+    "amount": 100.00,
+    "fee": 2.50,
+    "netAmount": 97.50,
+    "status": "pending"
+  }
+}
+```
+
+## Status codes
+
+| Status | Description |
+|--------|-------------|
+| `200` | Charge created successfully |
+| `400` | Invalid request parameters |
+| `401` | Invalid or missing authentication |
+| `422` | Validation error |
+| `500` | Internal server error |
+
+## Common errors
+
+### Missing amount
+
+```json
+{
+  "success": false,
+  "error": "Validation failed",
+  "code": "VALIDATION_ERROR",
+  "details": {
+    "amount": "Amount is required"
+  }
+}
+```
+
+### Invalid amount
+
+```json
+{
+  "success": false,
+  "error": "Validation failed",
+  "code": "VALIDATION_ERROR",
+  "details": {
+    "amount": "Amount must be greater than 0"
+  }
+}
+```
+
+### Duplicate external ID
+
+```json
+{
+  "success": false,
+  "error": "Transaction with this external ID already exists",
+  "code": "DUPLICATE_TRANSACTION"
+}
+```
+
+## Next steps
+
+- [Check payment status](/api-reference/pix/status)
+- [Set up webhooks](/webhooks) for real-time notifications
+- [Handle errors](/errors) properly
