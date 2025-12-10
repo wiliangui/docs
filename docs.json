@@ -12,36 +12,26 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Guias",
+        "tab": "API Reference",
         "groups": [
           {
-            "group": "Começando",
+            "group": "PrimePix API",
             "pages": [
-              "index",
-              "quickstart",
-              "authentication"
+              "api-reference/introduction",
+              "api-reference/authentication",
+              "api-reference/webhooks"
             ]
           },
           {
-            "group": "Recursos",
+            "group": "Objetos de resposta",
             "pages": [
-              "webhooks",
-              "errors"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "API reference",
-        "groups": [
-          {
-            "group": "Introdução",
-            "pages": [
-              "api-reference/introduction"
+              "api-reference/objects/transaction",
+              "api-reference/objects/customer",
+              "api-reference/objects/pix"
             ]
           },
           {
-            "group": "PIX",
+            "group": "Transações PIX",
             "pages": [
               "api-reference/pix/create",
               "api-reference/pix/status"
