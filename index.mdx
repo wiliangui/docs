@@ -1,56 +1,70 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "Introdução"
+description: "Bem-vindo à documentação oficial da PrimePix API v1"
 ---
 
-## Setting up
+## PrimePix API v1
 
-Get your documentation site up and running in minutes.
+A **PrimePix API** permite criar cobranças PIX, acompanhar pagamentos em tempo real e gerenciar o saldo da sua conta de forma simples e segura.
 
-<Card title="Start here" icon="rocket" horizontal href="/quickstart">
-  Follow our three step quickstart guide.
+Exemplo de resposta do endpoint raiz da API:
+
+    {
+      "status": "online",
+      "message": "PrimePix API v1 está funcionando",
+      "version": "1.0.0",
+      "baseUrl": "https://api.primepix.me/v1",
+      "endpoints": {
+        "pix_create": "/v1/pix/create",
+        "pix_status": "/v1/pix/status/:id",
+        "balance": "/v1/balance",
+        "transactions": "/v1/transactions",
+        "withdraw": "/v1/withdraw"
+      }
+    }
+
+## Comece em minutos
+
+Configure a integração e crie sua primeira cobrança PIX rapidamente.
+
+<Card title="Comece aqui" icon="rocket" horizontal href="/getting-started">
+  Siga o guia de primeiros passos para obter suas credenciais e chamar seu primeiro endpoint.
 </Card>
 
-## Make it yours
+## Fluxo básico da integração
 
-Design a docs site that looks great and empowers your users.
+Da criação da cobrança ao recebimento do valor na sua conta PrimePix.
 
 <Columns cols={2}>
-  <Card title="Edit locally" icon="pen-to-square" href="/development">
-    Edit your docs locally and preview them in real time.
+  <Card title="Autenticação" icon="shield-halved" href="/authentication">
+    Veja como usar <code>X-API-Key</code> e <code>X-API-Secret</code> em cada requisição.
   </Card>
-  <Card title="Customize your site" icon="palette" href="/essentials/settings">
-    Customize the design and colors of your site to match your brand.
+  <Card title="Criar cobrança PIX" icon="bolt" href="/api-reference/pix/create">
+    Gere um QR Code PIX ou código copia-e-cola para os seus clientes.
   </Card>
-  <Card title="Set up navigation" icon="map" href="/essentials/navigation">
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Acompanhar status" icon="circle-info" href="/api-reference/pix/status">
+    Consulte o status de uma cobrança: <code>pending</code>, <code>paid</code>, <code>expired</code> e outros.
   </Card>
-  <Card title="API documentation" icon="terminal" href="/api-reference/introduction">
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="Saldo, transações e saques" icon="wallet" href="/api-reference/account/balance">
+    Veja como consultar saldo, listar transações e solicitar saques da sua conta.
   </Card>
 </Columns>
 
-## Create beautiful pages
+## Referência completa da API
 
-Everything you need to create world-class documentation.
+Explore todos os endpoints disponíveis na PrimePix API v1.
 
 <Columns cols={2}>
-  <Card title="Write with MDX" icon="pen-fancy" href="/essentials/markdown">
-    Use MDX to style your docs pages.
+  <Card title="Visão geral da API" icon="book-open-cover" href="/api-reference/introduction">
+    Entenda a estrutura da API, base URL, padrões de resposta e códigos de erro.
   </Card>
-  <Card title="Code samples" icon="code" href="/essentials/code">
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card title="Images" icon="image" href="/essentials/images">
-    Display images and other media.
-  </Card>
-  <Card title="Reusable snippets" icon="recycle" href="/essentials/reusable-snippets">
-    Write once and reuse across your docs.
+  <Card title="Endpoints de conta" icon="piggy-bank" href="/api-reference/account/transactions">
+    Documentação detalhada de <code>/balance</code>, <code>/transactions</code> e <code>/withdraw</code>.
   </Card>
 </Columns>
 
-## Need inspiration?
+## Próximos passos
 
-<Card title="See complete examples" icon="stars" href="https://mintlify.com/customers">
-  Browse our showcase of exceptional documentation sites.
+<Card title="Ir para o dashboard" icon="gauge-high" href="https://app.primepix.me">
+  Acesse o Dashboard PrimePix para obter credenciais, acompanhar cobranças e visualizar relatórios.
 </Card>
