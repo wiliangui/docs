@@ -11,19 +11,15 @@
     "primary": "#00C2A8"
   },
   "topbarLinks": [
-    {
-      "name": "Painel",
-      "url": "https://app.primepix.me"
-    },
-    {
-      "name": "API",
-      "url": "https://api.primepix.me"
-    },
-    {
-      "name": "Suporte",
-      "url": "https://app.primepix.me"
-    }
+    { "name": "Painel", "url": "https://app.primepix.me" },
+    { "name": "API", "url": "https://api.primepix.me" },
+    { "name": "Suporte", "url": "https://app.primepix.me" }
   ],
+
+  "redirects": [
+    { "source": "/", "destination": "/index" }
+  ],
+
   "navigation": {
     "tabs": [
       {
@@ -31,13 +27,7 @@
         "groups": [
           {
             "group": "Começando",
-            "pages": [
-              "index",
-              "quickstart",
-              "authentication",
-              "rate-limits",
-              "errors"
-            ]
+            "pages": ["index", "quickstart", "authentication", "rate-limits", "errors"]
           },
           {
             "group": "Webhooks",
@@ -50,17 +40,11 @@
           },
           {
             "group": "Exemplos",
-            "pages": [
-              "examples/curl",
-              "examples/node",
-              "examples/php"
-            ]
+            "pages": ["examples/curl", "examples/node", "examples/php"]
           },
           {
             "group": "Produto",
-            "pages": [
-              "changelog"
-            ]
+            "pages": ["changelog"]
           }
         ]
       },
@@ -69,9 +53,7 @@
         "groups": [
           {
             "group": "Visão geral",
-            "pages": [
-              "api-reference/overview"
-            ]
+            "pages": ["api-reference/overview"]
           },
           {
             "group": "Endpoints",
