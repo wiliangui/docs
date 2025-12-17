@@ -1,0 +1,37 @@
+---
+title: cURL
+description: Exemplos rápidos com cURL.
+---
+
+# Exemplos com cURL
+
+## Consultar saldo
+
+```bash
+curl -X GET "https://api.primepix.me/v1/balance" \
+  -H "X-API-Key: SUA_API_KEY" \
+  -H "X-API-Secret: SEU_API_SECRET"
+```
+
+## Listar transações
+
+```bash
+curl -X GET "https://api.primepix.me/v1/transactions?page=1&limit=20&status=completed" \
+  -H "X-API-Key: SUA_API_KEY" \
+  -H "X-API-Secret: SEU_API_SECRET"
+```
+
+## Solicitar saque
+
+```bash
+curl -X POST "https://api.primepix.me/v1/withdraw" \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: SUA_API_KEY" \
+  -H "X-API-Secret: SEU_API_SECRET" \
+  -d '{
+    "amount": 500,
+    "pixKey": "joao@email.com",
+    "pixKeyType": "EMAIL",
+    "description": "Saque mensal"
+  }'
+```

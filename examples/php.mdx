@@ -1,0 +1,40 @@
+---
+title: PHP
+description: Exemplo com cURL no PHP.
+---
+
+# Exemplo PHP (cURL)
+
+```php
+<?php
+
+$baseUrl = "https://api.primepix.me/v1";
+$apiKey = getenv("PRIMEPIX_KEY");
+$apiSecret = getenv("PRIMEPIX_SECRET");
+
+$payload = [
+  "amount" => 150,
+  "externalId" => "pedido-12345",
+  "description" => "Pagamento do pedido #12345",
+  "expiresIn" => 60
+];
+
+$ch = curl_init($baseUrl . "/pix/create");
+curl_setopt_array($ch, [
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_POST => true,
+  CURLOPT_HTTPHEADER => [
+    "Content-Type: application/json",
+    "X-API-Key: {$apiKey}",
+    "X-API-Secret: {$apiSecret}",
+  ],
+  CURLOPT_POSTFIELDS => json_encode($payload),
+]);
+
+$response = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+echo "HTTP {$httpCode}\n";
+echo $response . "\n";
+```

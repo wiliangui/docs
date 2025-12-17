@@ -1,0 +1,26 @@
+---
+title: Visão geral
+description: Receba eventos de transações e saques em tempo real.
+---
+
+# Webhooks
+
+Webhooks notificam seu servidor sobre alterações de status.
+
+## Como configurar
+
+`POST /webhook/configure`
+
+```bash
+curl -X POST "https://api.primepix.me/v1/webhook/configure" \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: SUA_API_KEY" \
+  -H "X-API-Secret: SEU_API_SECRET" \
+  -d '{ "webhookUrl": "https://seusite.com/webhook/primepix" }'
+```
+
+A resposta inclui um `webhookSecret` usado para validar assinaturas.
+
+## Tempo de resposta
+
+Seu endpoint deve responder **2xx em até 10s**.

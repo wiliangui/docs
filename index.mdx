@@ -1,72 +1,32 @@
 ---
-title: "Introdução"
-description: "Bem-vindo à documentação oficial da PrimePix API v1"
+title: PrimePix API
+description: Documentação oficial da API pública do PrimePix Gateway de Pagamentos PIX.
 ---
 
-## PrimePix API v1
+# PrimePix API
 
-A **PrimePix API** permite criar cobranças PIX, acompanhar pagamentos em tempo real e gerenciar o saldo da sua conta de forma simples e segura.
+A API do PrimePix permite criar cobranças PIX, consultar transações, consultar saldo, solicitar saques e configurar webhooks.
 
-Exemplo de resposta do endpoint raiz da API:
-
-```json
-{
-  "status": "online",
-  "message": "PrimePix API v1 está funcionando",
-  "version": "1.0.0",
-  "baseUrl": "https://api.primepix.me/v1",
-  "endpoints": {
-    "pix_create": "/v1/pix/create",
-    "pix_status": "/v1/pix/status/:id",
-    "balance": "/v1/balance",
-    "transactions": "/v1/transactions",
-    "withdraw": "/v1/withdraw"
-  }
-}
-```
-
-## Comece em minutos
-
-Configure a integração e crie sua primeira cobrança PIX rapidamente.
-
-<Card title="Comece aqui" icon="rocket" horizontal href="/getting-started">
-  Siga o guia de primeiros passos para obter suas credenciais e chamar seu primeiro endpoint.
+<Card title="Quickstart" icon="rocket" href="/quickstart">
+  Comece em minutos: gere sua primeira cobrança PIX e confirme o pagamento.
 </Card>
 
-## Fluxo básico da integração
-
-Da criação da cobrança ao recebimento do valor na sua conta PrimePix.
-
 <Columns cols={2}>
-  <Card title="Autenticação" icon="shield-halved" href="/authentication">
-    Veja como usar <code>X-API-Key</code> e <code>X-API-Secret</code> em cada requisição.
+  <Card title="Autenticação" icon="key" href="/authentication">
+    Como usar X-API-Key e X-API-Secret.
   </Card>
-  <Card title="Criar cobrança PIX" icon="bolt" href="/api-reference/pix/create">
-    Gere um QR Code PIX ou código copia-e-cola para os seus clientes.
-  </Card>
-  <Card title="Acompanhar status" icon="circle-info" href="/api-reference/pix/status">
-    Consulte o status de uma cobrança: <code>pending</code>, <code>paid</code>, <code>expired</code> e outros.
-  </Card>
-  <Card title="Saldo, transações e saques" icon="wallet" href="/api-reference/account/balance">
-    Veja como consultar saldo, listar transações e solicitar saques da sua conta.
+  <Card title="Webhooks" icon="bell" href="/webhooks/overview">
+    Receba eventos em tempo real e valide a assinatura.
   </Card>
 </Columns>
 
-## Referência completa da API
+## Domínios
 
-Explore todos os endpoints disponíveis na PrimePix API v1.
+- **API**: `https://api.primepix.me`
+- **Painel**: `https://app.primepix.me`
 
-<Columns cols={2}>
-  <Card title="Visão geral da API" icon="book-open-cover" href="/api-reference/introduction">
-    Entenda a estrutura da API, base URL, padrões de resposta e códigos de erro.
-  </Card>
-  <Card title="Endpoints de conta" icon="piggy-bank" href="/api-reference/account/transactions">
-    Documentação detalhada de <code>/balance</code>, <code>/transactions</code> e <code>/withdraw</code>.
-  </Card>
-</Columns>
+## Base URL
 
-## Próximos passos
+Todas as rotas neste guia assumem:
 
-<Card title="Ir para o dashboard" icon="gauge-high" href="https://app.primepix.me">
-  Acesse o Dashboard PrimePix para obter credenciais, acompanhar cobranças e visualizar relatórios.
-</Card>
+`https://api.primepix.me/v1`

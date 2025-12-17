@@ -1,0 +1,38 @@
+---
+title: Segurança
+description: Validação de assinatura HMAC-SHA256.
+---
+
+# Segurança (assinatura)
+
+Todos os webhooks incluem o header:
+
+`X-Webhook-Signature`
+
+A assinatura é **HMAC-SHA256** do JSON do payload usando o seu `webhookSecret`.
+
+## Exemplo (Node.js / Express)
+
+```js
+import crypto from "crypto";
+
+export function validateWebhook(payload, signature, secret) {
+  const expected = crypto
+    .createHmac("sha256", secret)
+    .update(JSON.stringify(payload))
+    .digest("hex");
+
+  // timing-safe compare
+  const a = Buffer.from(signature || "", "utf8");
+  const b = Buffer.from(expected, "utf8");
+  if (a.length !== b.length) return false;
+
+  return crypto.timingSafeEqual(a, b);
+}
+```
+
+## Boas práticas
+
+- Exija HTTPS
+- Valide assinatura **antes** de processar o evento
+- Faça idempotência (não processe o mesmo evento duas vezes)

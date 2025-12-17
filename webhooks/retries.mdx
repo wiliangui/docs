@@ -1,0 +1,17 @@
+---
+title: Retentativas
+description: Política de retry e como preparar seu endpoint.
+---
+
+# Retentativas (retry)
+
+Política informada:
+
+- Até **5 tentativas**
+- Intervalos: **1m, 2m, 4m, 8m, 16m** (backoff exponencial)
+
+## Recomendado no seu webhook
+
+- Retorne `200 OK` apenas quando **processar com sucesso**
+- Em falha temporária, retorne `500` para permitir retry
+- Faça idempotência usando `transactionId` / `withdrawalId`

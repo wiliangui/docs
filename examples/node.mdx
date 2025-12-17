@@ -1,0 +1,38 @@
+---
+title: Node.js
+description: Exemplo simples com fetch (Node 18+).
+---
+
+# Exemplo Node.js
+
+```js
+const baseUrl = "https://api.primepix.me/v1";
+
+async function primepixCreatePix() {
+  const res = await fetch(`${baseUrl}/pix/create`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-API-Key": process.env.PRIMEPIX_KEY,
+      "X-API-Secret": process.env.PRIMEPIX_SECRET,
+    },
+    body: JSON.stringify({
+      amount: 150,
+      externalId: "pedido-12345",
+      description: "Pagamento do pedido #12345",
+      expiresIn: 60,
+      customer: {
+        name: "João da Silva",
+        document: "123.456.789-00",
+        email: "joao@email.com",
+      },
+    }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(JSON.stringify(data));
+  return data;
+}
+
+primepixCreatePix().then(console.log).catch(console.error);
+```

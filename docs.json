@@ -1,104 +1,84 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "PrimePix API",
-  "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+  "name": "PrimePix",
+  "logo": {
+    "light": "/assets/logo-light.svg",
+    "dark": "/assets/logo-dark.svg"
   },
-  "favicon": "/favicon.svg",
+  "favicon": "/assets/favicon.svg",
+  "colors": {
+    "primary": "#00C2A8"
+  },
+  "topbarLinks": [
+    {
+      "name": "Painel",
+      "url": "https://app.primepix.me"
+    },
+    {
+      "name": "API",
+      "url": "https://api.primepix.me"
+    },
+    {
+      "name": "Suporte",
+      "url": "https://app.primepix.me"
+    }
+  ],
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Guia",
         "groups": [
           {
-            "group": "PrimePix",
+            "group": "Começando",
             "pages": [
               "index",
-              "getting-started",
-              "authentication"
+              "quickstart",
+              "authentication",
+              "rate-limits",
+              "errors"
+            ]
+          },
+          {
+            "group": "Webhooks",
+            "pages": [
+              "webhooks/overview",
+              "webhooks/security",
+              "webhooks/events",
+              "webhooks/retries"
+            ]
+          },
+          {
+            "group": "Exemplos",
+            "pages": [
+              "examples/curl",
+              "examples/node",
+              "examples/php"
+            ]
+          },
+          {
+            "group": "Produto",
+            "pages": [
+              "changelog"
             ]
           }
         ]
       },
       {
-        "tab": "API reference",
+        "tab": "API Reference",
         "groups": [
           {
-            "group": "Introdução",
+            "group": "Visão geral",
             "pages": [
-              "api-reference/introduction"
+              "api-reference/overview"
             ]
           },
           {
-            "group": "PIX",
-            "pages": [
-              "api-reference/pix/create",
-              "api-reference/pix/status"
-            ]
-          },
-          {
-            "group": "Conta",
-            "pages": [
-              "api-reference/account/balance",
-              "api-reference/account/transactions",
-              "api-reference/account/withdraw"
-            ]
+            "group": "Endpoints",
+            "openapi": "openapi.json"
           }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Dashboard",
-          "href": "https://app.primepix.me",
-          "icon": "rocket"
-        },
-        {
-          "anchor": "API Status",
-          "href": "https://api.primepix.me/v1",
-          "icon": "circle-info"
-        }
-      ]
-    }
-  },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
-  "navbar": {
-    "links": [
-      {
-        "label": "Suporte",
-        "href": "mailto:support@primepix.me"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://app.primepix.me"
-    }
-  },
-  "contextual": {
-    "options": [
-      "copy",
-      "view",
-      "chatgpt",
-      "claude",
-      "perplexity",
-      "mcp",
-      "cursor",
-      "vscode"
     ]
-  },
-  "footer": {
-    "socials": {
-      "x": "https://x.com/primepix",
-      "github": "https://github.com/primepix",
-      "linkedin": "https://linkedin.com/company/primepix"
-    }
   }
 }

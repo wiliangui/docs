@@ -1,0 +1,25 @@
+---
+title: Autenticação
+description: Como autenticar requisições na PrimePix API.
+---
+
+# Autenticação
+
+Todas as requisições devem incluir:
+
+- `X-API-Key` (obrigatório)
+- `X-API-Secret` (opcional, aumenta segurança)
+
+## Exemplo
+
+```bash
+curl -X GET "https://api.primepix.me/v1/balance" \
+  -H "X-API-Key: SUA_API_KEY" \
+  -H "X-API-Secret: SEU_API_SECRET"
+```
+
+## Boas práticas
+
+- Restrinja acesso por IP no painel (**Configurações → API**)
+- Nunca exponha a key/secret no front-end
+- Rotacione chaves caso suspeite de vazamento

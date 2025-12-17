@@ -1,0 +1,39 @@
+---
+title: Eventos
+description: Tipos de eventos suportados e quando são disparados.
+---
+
+# Eventos
+
+Eventos possíveis:
+
+- `transaction.created`
+- `transaction.updated`
+- `transaction.completed`
+- `transaction.failed`
+- `transaction.expired`
+- `withdrawal.created`
+- `withdrawal.completed`
+- `withdrawal.failed`
+
+## Payload
+
+O corpo segue este formato (exemplo):
+
+```json
+{
+  "event": "transaction.completed",
+  "timestamp": "2025-01-15T15:45:30-03:00",
+  "data": {
+    "transactionId": 12345,
+    "externalId": "pedido-12345",
+    "amount": 150,
+    "status": "completed",
+    "previousStatus": "pending",
+    "customer": {
+      "name": "João da Silva",
+      "document": "123.456.789-00"
+    }
+  }
+}
+```

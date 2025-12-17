@@ -1,0 +1,41 @@
+---
+title: Erros
+description: Padrão de erros e códigos comuns.
+---
+
+# Erros
+
+A API responde em JSON.
+
+## Exemplo (400)
+
+```json
+{
+  "success": false,
+  "error": "Valor mínimo é R$ 1,00"
+}
+```
+
+## Exemplo (401)
+
+```json
+{
+  "success": false,
+  "error": "Credenciais inválidas"
+}
+```
+
+## Exemplo (403)
+
+Conta sem KYC aprovado:
+
+```json
+{
+  "success": false,
+  "error": "Sua conta precisa ser verificada (KYC) para usar a API"
+}
+```
+
+## Dica de integração
+
+- Logue o **status code** + **body** para diagnosticar rápido.

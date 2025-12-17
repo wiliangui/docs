@@ -1,0 +1,909 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "PrimePix API",
+    "version": "1.0.0",
+    "description": "\nAPI pública do PrimePix Gateway de Pagamentos PIX.\n\n## Domínios\n- **API**: https://api.primepix.me\n- **Painel**: https://app.primepix.me\n\n## Autenticação\nTodas as requisições devem incluir os headers:\n- `X-API-Key`: Sua chave de API\n- `X-API-Secret`: Seu secret de API (opcional, aumenta segurança)\n\nObtenha suas credenciais em: https://app.primepix.me/settings (aba API)\n\n## Restrição por IP\nVocê pode restringir o acesso à API por IP no painel em Configurações \u003E API.\n\n## Rate Limiting\n- 100 requisições por minuto por IP\n- 1000 requisições por hora por merchant\n\n## Webhooks\nConfigure webhooks para receber notificações em tempo real sobre eventos de transação.\n      ",
+    "contact": {
+      "name": "Suporte PrimePix",
+      "url": "https://app.primepix.me"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.primepix.me/v1",
+      "description": "Produção"
+    }
+  ],
+  "security": [
+    {
+      "apiKey": [],
+      "apiSecret": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "PIX",
+      "description": "Operações de cobrança PIX"
+    },
+    {
+      "name": "Transações",
+      "description": "Consulta de transações"
+    },
+    {
+      "name": "Saldo",
+      "description": "Consulta e saque de saldo"
+    },
+    {
+      "name": "Webhooks",
+      "description": "Configuração de webhooks"
+    }
+  ],
+  "paths": {
+    "/pix/create": {
+      "post": {
+        "tags": [
+          "PIX"
+        ],
+        "summary": "Criar cobrança PIX",
+        "description": "Gera um QR Code PIX para recebimento de pagamento",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "amount"
+                ],
+                "properties": {
+                  "amount": {
+                    "type": "number",
+                    "description": "Valor da cobrança em reais (mínimo: R$ 1,00)",
+                    "example": 100,
+                    "minimum": 1
+                  },
+                  "externalId": {
+                    "type": "string",
+                    "description": "ID externo para referência no seu sistema",
+                    "example": "pedido-12345",
+                    "maxLength": 255
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Descrição da cobrança (aparece no comprovante)",
+                    "example": "Pagamento do pedido #12345",
+                    "maxLength": 500
+                  },
+                  "expiresIn": {
+                    "type": "integer",
+                    "description": "Tempo de expiração em minutos (padrão: 30)",
+                    "example": 60,
+                    "default": 30,
+                    "minimum": 5,
+                    "maximum": 1440
+                  },
+                  "customer": {
+                    "type": "object",
+                    "description": "Dados do cliente (opcional)",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Nome do cliente",
+                        "example": "João da Silva"
+                      },
+                      "document": {
+                        "type": "string",
+                        "description": "CPF ou CNPJ do cliente",
+                        "example": "123.456.789-00"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "description": "Telefone do cliente",
+                        "example": "(11) 99999-9999"
+                      },
+                      "email": {
+                        "type": "string",
+                        "description": "E-mail do cliente",
+                        "example": "joao@email.com"
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "amount": 150,
+                "externalId": "pedido-12345",
+                "description": "Compra na loja online",
+                "expiresIn": 60,
+                "customer": {
+                  "name": "João da Silva",
+                  "document": "123.456.789-00",
+                  "email": "joao@email.com"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cobrança criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PixCreateResponse"
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "transactionId": 12345,
+                    "externalId": "pedido-12345",
+                    "qrCode": "00020126580014br.gov.bcb.pix0136a1b2c3d4-e5f6-7890-abcd-ef1234567890520400005303986540515.005802BR5913PRIMEPIX6008SAOPAULO62070503***6304ABCD",
+                    "qrCodeBase64": "data:image/png;base64,iVBORw0KGgo...",
+                    "amount": 150,
+                    "fee": 1.5,
+                    "netAmount": 148.5,
+                    "status": "pending",
+                    "expiresAt": "2025-01-15T16:30:00.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Valor mínimo é R$ 1,00"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Credenciais inválidas"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "KYC não aprovado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Sua conta precisa ser verificada (KYC) para usar a API"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pix/status/{id}": {
+      "get": {
+        "tags": [
+          "PIX"
+        ],
+        "summary": "Consultar status da cobrança",
+        "description": "Retorna o status atual de uma cobrança PIX",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID da transação (interno, externo ou VersellPay)",
+            "schema": {
+              "type": "string"
+            },
+            "examples": {
+              "internal": {
+                "value": "12345",
+                "summary": "ID interno"
+              },
+              "external": {
+                "value": "pedido-12345",
+                "summary": "ID externo"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Status da transação",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionStatusResponse"
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 12345,
+                    "externalId": "pedido-12345",
+                    "amount": 150,
+                    "fee": 1.5,
+                    "netAmount": 148.5,
+                    "status": "completed",
+                    "type": "deposit",
+                    "description": "Compra na loja online",
+                    "customer": {
+                      "name": "João da Silva",
+                      "document": "123.456.789-00"
+                    },
+                    "paidAt": "2025-01-15T15:45:30.000Z",
+                    "createdAt": "2025-01-15T15:30:00.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Transação não encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transactions": {
+      "get": {
+        "tags": [
+          "Transações"
+        ],
+        "summary": "Listar transações",
+        "description": "Retorna lista paginada de transações com filtros opcionais",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Página (começa em 1)",
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Itens por página (máximo 100)",
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filtrar por status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "completed",
+                "failed",
+                "expired",
+                "refunded"
+              ]
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Filtrar por tipo",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "deposit",
+                "withdrawal"
+              ]
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "Data inicial (ISO 8601)",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "example": "2025-01-01T00:00:00Z"
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "Data final (ISO 8601)",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "example": "2025-01-31T23:59:59Z"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Buscar por nome, documento ou ID externo",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "minAmount",
+            "in": "query",
+            "description": "Valor mínimo",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxAmount",
+            "in": "query",
+            "description": "Valor máximo",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de transações",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/balance": {
+      "get": {
+        "tags": [
+          "Saldo"
+        ],
+        "summary": "Consultar saldo",
+        "description": "Retorna o saldo disponível, pendente e total da conta",
+        "responses": {
+          "200": {
+            "description": "Saldo da conta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BalanceResponse"
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "available": 5000,
+                    "pending": 150,
+                    "total": 5150,
+                    "currency": "BRL"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/withdraw": {
+      "post": {
+        "tags": [
+          "Saldo"
+        ],
+        "summary": "Solicitar saque",
+        "description": "Solicita um saque via PIX para a chave informada",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "amount",
+                  "pixKey",
+                  "pixKeyType"
+                ],
+                "properties": {
+                  "amount": {
+                    "type": "number",
+                    "description": "Valor do saque em reais",
+                    "example": 500,
+                    "minimum": 10
+                  },
+                  "pixKey": {
+                    "type": "string",
+                    "description": "Chave PIX de destino",
+                    "example": "joao@email.com"
+                  },
+                  "pixKeyType": {
+                    "type": "string",
+                    "description": "Tipo da chave PIX",
+                    "enum": [
+                      "CPF",
+                      "CNPJ",
+                      "EMAIL",
+                      "PHONE",
+                      "EVP"
+                    ],
+                    "example": "EMAIL"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Descrição do saque",
+                    "example": "Saque mensal"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Saque solicitado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "withdrawalId": {
+                          "type": "integer"
+                        },
+                        "amount": {
+                          "type": "number"
+                        },
+                        "fee": {
+                          "type": "number"
+                        },
+                        "netAmount": {
+                          "type": "number"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "estimatedCompletion": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "withdrawalId": 789,
+                    "amount": 500,
+                    "fee": 2,
+                    "netAmount": 498,
+                    "status": "pending",
+                    "estimatedCompletion": "Em até 24 horas úteis"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Saldo insuficiente ou dados inválidos"
+          }
+        }
+      }
+    },
+    "/webhook/configure": {
+      "post": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Configurar webhook",
+        "description": "Configura uma URL para receber notificações de eventos",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "webhookUrl"
+                ],
+                "properties": {
+                  "webhookUrl": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URL que receberá os webhooks (HTTPS recomendado)",
+                    "example": "https://seusite.com/webhook/primepix"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Webhook configurado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "webhookUrl": {
+                          "type": "string"
+                        },
+                        "webhookSecret": {
+                          "type": "string",
+                          "description": "Secret para validar assinatura dos webhooks"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Consultar webhook",
+        "description": "Retorna a configuração atual do webhook",
+        "responses": {
+          "200": {
+            "description": "Configuração do webhook"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Remover webhook",
+        "description": "Remove a configuração de webhook",
+        "responses": {
+          "200": {
+            "description": "Webhook removido"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "Chave de API obtida no painel"
+      },
+      "apiSecret": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Secret",
+        "description": "Secret de API (opcional, aumenta segurança)"
+      }
+    },
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "PixCreateResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "transactionId": {
+                "type": "integer"
+              },
+              "externalId": {
+                "type": "string"
+              },
+              "qrCode": {
+                "type": "string",
+                "description": "Código copia e cola do PIX"
+              },
+              "qrCodeBase64": {
+                "type": "string",
+                "description": "QR Code em base64"
+              },
+              "amount": {
+                "type": "number"
+              },
+              "fee": {
+                "type": "number"
+              },
+              "netAmount": {
+                "type": "number"
+              },
+              "status": {
+                "type": "string"
+              },
+              "expiresAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      },
+      "TransactionStatusResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "externalId": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "number"
+              },
+              "fee": {
+                "type": "number"
+              },
+              "netAmount": {
+                "type": "number"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "pending",
+                  "completed",
+                  "failed",
+                  "expired",
+                  "refunded"
+                ]
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "deposit",
+                  "withdrawal"
+                ]
+              },
+              "description": {
+                "type": "string"
+              },
+              "customer": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "document": {
+                    "type": "string"
+                  }
+                }
+              },
+              "paidAt": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      },
+      "TransactionListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "transactions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/TransactionStatusResponse/properties/data"
+                }
+              },
+              "pagination": {
+                "type": "object",
+                "properties": {
+                  "page": {
+                    "type": "integer"
+                  },
+                  "limit": {
+                    "type": "integer"
+                  },
+                  "total": {
+                    "type": "integer"
+                  },
+                  "totalPages": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "BalanceResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "available": {
+                "type": "number",
+                "description": "Saldo disponível para saque"
+              },
+              "pending": {
+                "type": "number",
+                "description": "Saldo em processamento"
+              },
+              "total": {
+                "type": "number",
+                "description": "Saldo total"
+              },
+              "currency": {
+                "type": "string",
+                "example": "BRL"
+              }
+            }
+          }
+        }
+      },
+      "WebhookPayload": {
+        "type": "object",
+        "description": "Payload enviado pelo webhook",
+        "properties": {
+          "event": {
+            "type": "string",
+            "description": "Tipo do evento",
+            "enum": [
+              "transaction.created",
+              "transaction.updated",
+              "transaction.completed",
+              "transaction.failed",
+              "transaction.expired",
+              "withdrawal.created",
+              "withdrawal.completed",
+              "withdrawal.failed"
+            ]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Data/hora do evento (timezone São Paulo)"
+          },
+          "data": {
+            "type": "object",
+            "description": "Dados do evento",
+            "properties": {
+              "transactionId": {
+                "type": "integer"
+              },
+              "externalId": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "number"
+              },
+              "status": {
+                "type": "string"
+              },
+              "previousStatus": {
+                "type": "string"
+              },
+              "customer": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "document": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "example": {
+          "event": "transaction.completed",
+          "timestamp": "2025-01-15T15:45:30-03:00",
+          "data": {
+            "transactionId": 12345,
+            "externalId": "pedido-12345",
+            "amount": 150,
+            "status": "completed",
+            "previousStatus": "pending",
+            "customer": {
+              "name": "João da Silva",
+              "document": "123.456.789-00"
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {
+    "transactionUpdated": {
+      "post": {
+        "summary": "Notificação de transação",
+        "description": "\n## Validação de Assinatura\n\nTodos os webhooks incluem o header `X-Webhook-Signature` com uma assinatura HMAC-SHA256.\n\n**Como validar:**\n```javascript\nconst crypto = require('crypto');\n\nfunction validateWebhook(payload, signature, secret) {\n  const expectedSignature = crypto\n    .createHmac('sha256', secret)\n    .update(JSON.stringify(payload))\n    .digest('hex');\n  \n  return crypto.timingSafeEqual(\n    Buffer.from(signature),\n    Buffer.from(expectedSignature)\n  );\n}\n\n// No seu endpoint\napp.post('/webhook/primepix', (req, res) => {\n  const signature = req.headers['x-webhook-signature'];\n  const isValid = validateWebhook(req.body, signature, process.env.PRIMEPIX_WEBHOOK_SECRET);\n  \n  if (!isValid) {\n    return res.status(401).send('Assinatura inválida');\n  }\n  \n  // Processar webhook...\n  const { event, data } = req.body;\n  \n  switch (event) {\n    case 'transaction.completed':\n      // Pagamento confirmado\n      await processPayment(data);\n      break;\n    case 'transaction.failed':\n      // Pagamento falhou\n      await handleFailure(data);\n      break;\n  }\n  \n  res.status(200).send('OK');\n});\n```\n\n## Retry Policy\n\n- Tentamos entregar o webhook até 5 vezes\n- Intervalo entre tentativas: 1min, 2min, 4min, 8min, 16min (backoff exponencial)\n- Seu endpoint deve retornar status 2xx em até 10 segundos\n\n## Eventos Disponíveis\n\n| Evento | Descrição |\n|--------|-----------|\n| `transaction.created` | Nova cobrança criada |\n| `transaction.updated` | Status da transação atualizado |\n| `transaction.completed` | Pagamento confirmado |\n| `transaction.failed` | Pagamento falhou |\n| `transaction.expired` | Cobrança expirou |\n| `withdrawal.created` | Saque solicitado |\n| `withdrawal.completed` | Saque realizado |\n| `withdrawal.failed` | Saque falhou |\n          ",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Webhook recebido com sucesso"
+          }
+        }
+      }
+    }
+  }
+}

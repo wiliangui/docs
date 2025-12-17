@@ -1,0 +1,16 @@
+---
+title: Rate limiting
+description: Limites de requisições e como tratar.
+---
+
+# Rate limiting
+
+Limites informados:
+
+- **100 requisições por minuto por IP**
+- **1000 requisições por hora por merchant**
+
+## Recomendações
+
+- Faça **retry com backoff** quando receber erro de limite
+- Evite polling agressivo do status — use **webhooks**
